@@ -19,6 +19,7 @@
         }
         .board {
             display: flex;
+            flex-wrap: wrap;
             justify-content: space-between;
             gap: 10px;
             margin-top: 20px;
@@ -41,6 +42,19 @@
             padding: 10px;
             border-radius: 3px;
             cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task.completed {
+            background-color: #d4edda;
+        }
+        .task.in-progress {
+            background-color: #fff3cd;
+        }
+        .task .status-check {
+            font-size: 1.5em;
+            margin-left: 10px;
         }
         .add-task, .add-folder, .add-link, .upload-file {
             padding: 10px;
@@ -56,7 +70,7 @@
             background-color: #009e8a;
         }
         .task textarea {
-            width: 100%;
+            width: 80%;
             border: none;
             resize: none;
             background: #ececec;
@@ -93,12 +107,13 @@
     <div class="container">
         <h1>Organizador Personal Avanzado</h1>
         <button class="add-folder" onclick="addFolder()">Agregar Carpeta</button>
-        <div id="folders"></div>
+        <div id="folders" class="board"></div>
         <div class="board" id="board">
             <div class="list" id="todo">
                 <div class="list-title">Tareas por Hacer</div>
                 <div class="task">
                     <textarea>Ejemplo de Tarea</textarea>
+                    <span class="status-check" style="color: red;">&#x2716;</span>
                 </div>
                 <button class="add-task" onclick="addTask('todo')">Agregar Tarea</button>
                 <button class="upload-file" onclick="uploadFile('todo')">Subir Archivo</button>
@@ -129,20 +144,28 @@
     </div>
 
     <script>
+        let folderCount = 0;
+
         function addTask(listId) {
             const list = document.getElementById(listId);
             const newTask = document.createElement('div');
             newTask.className = 'task';
-            newTask.innerHTML = '<textarea></textarea>';
+            newTask.innerHTML = '<textarea></textarea><span class="status-check" style="color: red;">&#x2716;</span>';
+            newTask.onclick = () => moveTask(newTask);
             list.insertBefore(newTask, list.querySelector('.add-task'));
         }
 
         function addFolder() {
             const foldersContainer = document.getElementById('folders');
+            folderCount++;
             const newFolder = document.createElement('div');
             newFolder.className = 'list';
+            newFolder.setAttribute('draggable', true);
+            newFolder.ondragstart = dragStart;
+            newFolder.ondragover = dragOver;
+            newFolder.ondrop = drop;
             newFolder.innerHTML = `
-                <div class="list-title">Nueva Carpeta</div>
+                <div class="list-title">Carpeta ${folderCount}</div>
                 <button class="add-task" onclick="addTaskToFolder(this)">Agregar Tarea</button>
                 <button class="upload-file" onclick="uploadFileToFolder(this)">Subir Archivo</button>
                 <button class="add-link" onclick="addLinkToFolder(this)">Agregar Enlace</button>
@@ -154,7 +177,8 @@
             const folder = button.parentElement;
             const newTask = document.createElement('div');
             newTask.className = 'task';
-            newTask.innerHTML = '<textarea></textarea>';
+            newTask.innerHTML = '<textarea></textarea><span class="status-check" style="color: red;">&#x2716;</span>';
+            newTask.onclick = () => moveTask(newTask);
             folder.insertBefore(newTask, button);
         }
 
@@ -196,6 +220,45 @@
                 console.log('Archivo subido:', files[i].name);
             }
             alert('Archivos subidos correctamente');
+        }
+
+        function moveTask(task) {
+            const currentList = task.parentElement;
+            let targetList;
+            let statusColor;
+            if (currentList.id === 'todo') {
+                targetList = document.getElementById('inProgress');
+                task.classList.remove('completed');
+                task.classList.add('in-progress');
+                statusColor = 'orange';
+            } else if (currentList.id === 'inProgress') {
+                targetList = document.getElementById('done');
+                task.classList.remove('in-progress');
+                task.classList.add('completed');
+                statusColor = 'green';
+                task.innerHTML += `<div>Finalizado: ${new Date().toLocaleDateString()}</div>`;
+            } else {
+                return;
+            }
+            task.querySelector('.status-check').style.color = statusColor;
+            targetList.insertBefore(task, targetList.querySelector('.add-task'));
+        }
+
+        function dragStart(event) {
+            event.dataTransfer.setData('text/plain', event.target.id);
+        }
+
+        function dragOver(event) {
+            event.preventDefault();
+        }
+
+        function drop(event) {
+            event.preventDefault();
+            const id = event.dataTransfer.getData('text/plain');
+            const draggableElement = document.getElementById(id);
+            const dropzone = event.target;
+            dropzone.appendChild(draggableElement);
+            event.dataTransfer.clearData();
         }
     </script>
 </body>
