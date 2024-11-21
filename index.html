@@ -42,7 +42,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        .add-task {
+        .add-task, .add-folder {
             padding: 10px;
             background-color: #00bfa5;
             color: #ffffff;
@@ -52,7 +52,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        .add-task:hover {
+        .add-task:hover, .add-folder:hover {
             background-color: #009e8a;
         }
         .task textarea {
@@ -64,37 +64,74 @@
         .task textarea:focus {
             outline: none;
         }
+        #calendar {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        #calendar iframe {
+            width: 100%;
+            height: 600px;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Organizador Personal</h1>
+        <button class="add-folder" onclick="addFolder()">Agregar Carpeta</button>
+        <div id="folders"></div>
         <div class="board" id="board">
-            <div class="list">
+            <div class="list" id="todo">
                 <div class="list-title">Tareas por Hacer</div>
                 <div class="task">
                     <textarea>Ejemplo de Tarea</textarea>
                 </div>
                 <button class="add-task" onclick="addTask('todo')">Agregar Tarea</button>
             </div>
-            <div class="list">
+            <div class="list" id="inProgress">
                 <div class="list-title">En Progreso</div>
                 <button class="add-task" onclick="addTask('inProgress')">Agregar Tarea</button>
             </div>
-            <div class="list">
+            <div class="list" id="done">
                 <div class="list-title">Completadas</div>
                 <button class="add-task" onclick="addTask('done')">Agregar Tarea</button>
             </div>
         </div>
+        <div id="calendar">
+            <h2>Calendario Interactivo</h2>
+            <iframe src="https://calendar.google.com/calendar/embed?src=es.spain%23holiday%40group.v.calendar.google.com&ctz=Europe%2FMadrid"></iframe>
+        </div>
     </div>
 
     <script>
-        function addTask(listType) {
-            const list = document.querySelector(`.list-title:contains(${listType})`).parentElement;
+        function addTask(listId) {
+            const list = document.getElementById(listId);
             const newTask = document.createElement('div');
             newTask.className = 'task';
             newTask.innerHTML = '<textarea></textarea>';
             list.insertBefore(newTask, list.querySelector('.add-task'));
+        }
+
+        function addFolder() {
+            const foldersContainer = document.getElementById('folders');
+            const newFolder = document.createElement('div');
+            newFolder.className = 'list';
+            newFolder.innerHTML = `
+                <div class="list-title">Nueva Carpeta</div>
+                <button class="add-task" onclick="addTaskToFolder(this)">Agregar Tarea</button>
+            `;
+            foldersContainer.appendChild(newFolder);
+        }
+
+        function addTaskToFolder(button) {
+            const folder = button.parentElement;
+            const newTask = document.createElement('div');
+            newTask.className = 'task';
+            newTask.innerHTML = '<textarea></textarea>';
+            folder.insertBefore(newTask, button);
         }
     </script>
 </body>
