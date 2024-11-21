@@ -31,6 +31,7 @@
             width: 100%;
             max-width: 300px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
+            position: relative;
         }
         .list-title {
             font-weight: bold;
@@ -78,6 +79,16 @@
         .task textarea:focus {
             outline: none;
         }
+        .delete-folder {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: red;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
         #calendar {
             margin-top: 20px;
             padding: 20px;
@@ -85,10 +96,11 @@
             border-radius: 5px;
             box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
-        #calendar iframe {
+        #calendar textarea {
             width: 100%;
-            height: 600px;
+            height: 100px;
             border: none;
+            resize: none;
         }
         .upload-area {
             margin-top: 20px;
@@ -111,7 +123,7 @@
         <div class="board" id="board">
             <div class="list" id="todo">
                 <div class="list-title">Tareas por Hacer</div>
-                <div class="task">
+                <div class="task" onclick="moveTask(this)">
                     <textarea>Ejemplo de Tarea</textarea>
                     <span class="status-check" style="color: red;">&#x2716;</span>
                 </div>
@@ -134,7 +146,8 @@
         </div>
         <div id="calendar">
             <h2>Calendario Interactivo</h2>
-            <iframe src="https://calendar.google.com/calendar/embed?src=es.spain%23holiday%40group.v.calendar.google.com&ctz=Europe%2FMadrid"></iframe>
+            <textarea id="calendarTaskInput" placeholder="Escribe tu tarea aquí..."></textarea>
+            <button onclick="addCalendarTask()">Agregar al Tablero</button>
         </div>
         <div class="upload-area">
             <h2>Subir Archivos</h2>
@@ -165,12 +178,33 @@
             newFolder.ondragover = dragOver;
             newFolder.ondrop = drop;
             newFolder.innerHTML = `
+                <button class="delete-folder" onclick="deleteFolder(this)">&times;</button>
                 <div class="list-title">Carpeta ${folderCount}</div>
                 <button class="add-task" onclick="addTaskToFolder(this)">Agregar Tarea</button>
                 <button class="upload-file" onclick="uploadFileToFolder(this)">Subir Archivo</button>
                 <button class="add-link" onclick="addLinkToFolder(this)">Agregar Enlace</button>
             `;
             foldersContainer.appendChild(newFolder);
+        }
+
+        function deleteFolder(button) {
+            const folder = button.parentElement;
+            folder.remove();
+        }
+
+        function addCalendarTask() {
+            const taskDescription = document.getElementById('calendarTaskInput').value;
+            if (taskDescription.trim() === '') {
+                alert('Por favor escribe una tarea antes de agregarla.');
+                return;
+            }
+            const todoList = document.getElementById('todo');
+            const newTask = document.createElement('div');
+            newTask.className = 'task';
+            newTask.innerHTML = `<textarea>${taskDescription}</textarea><span class="status-check" style="color: red;">&#x2716;</span>`;
+            newTask.onclick = () => moveTask(newTask);
+            todoList.insertBefore(newTask, todoList.querySelector('.add-task'));
+            document.getElementById('calendarTaskInput').value = '';
         }
 
         function addTaskToFolder(button) {
