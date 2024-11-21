@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Organizador Personal</title>
+    <title>Organizador Personal Avanzado</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
     <style>
@@ -42,7 +42,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        .add-task, .add-folder {
+        .add-task, .add-folder, .add-link, .upload-file {
             padding: 10px;
             background-color: #00bfa5;
             color: #ffffff;
@@ -52,7 +52,7 @@
             border-radius: 3px;
             cursor: pointer;
         }
-        .add-task:hover, .add-folder:hover {
+        .add-task:hover, .add-folder:hover, .add-link:hover, .upload-file:hover {
             background-color: #009e8a;
         }
         .task textarea {
@@ -76,11 +76,22 @@
             height: 600px;
             border: none;
         }
+        .upload-area {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #ffffff;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        }
+        .upload-area input {
+            display: block;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Organizador Personal</h1>
+        <h1>Organizador Personal Avanzado</h1>
         <button class="add-folder" onclick="addFolder()">Agregar Carpeta</button>
         <div id="folders"></div>
         <div class="board" id="board">
@@ -90,19 +101,30 @@
                     <textarea>Ejemplo de Tarea</textarea>
                 </div>
                 <button class="add-task" onclick="addTask('todo')">Agregar Tarea</button>
+                <button class="upload-file" onclick="uploadFile('todo')">Subir Archivo</button>
+                <button class="add-link" onclick="addLink('todo')">Agregar Enlace</button>
             </div>
             <div class="list" id="inProgress">
                 <div class="list-title">En Progreso</div>
                 <button class="add-task" onclick="addTask('inProgress')">Agregar Tarea</button>
+                <button class="upload-file" onclick="uploadFile('inProgress')">Subir Archivo</button>
+                <button class="add-link" onclick="addLink('inProgress')">Agregar Enlace</button>
             </div>
             <div class="list" id="done">
                 <div class="list-title">Completadas</div>
                 <button class="add-task" onclick="addTask('done')">Agregar Tarea</button>
+                <button class="upload-file" onclick="uploadFile('done')">Subir Archivo</button>
+                <button class="add-link" onclick="addLink('done')">Agregar Enlace</button>
             </div>
         </div>
         <div id="calendar">
             <h2>Calendario Interactivo</h2>
             <iframe src="https://calendar.google.com/calendar/embed?src=es.spain%23holiday%40group.v.calendar.google.com&ctz=Europe%2FMadrid"></iframe>
+        </div>
+        <div class="upload-area">
+            <h2>Subir Archivos</h2>
+            <input type="file" id="fileUpload" multiple>
+            <button onclick="handleFileUpload()">Subir</button>
         </div>
     </div>
 
@@ -122,6 +144,8 @@
             newFolder.innerHTML = `
                 <div class="list-title">Nueva Carpeta</div>
                 <button class="add-task" onclick="addTaskToFolder(this)">Agregar Tarea</button>
+                <button class="upload-file" onclick="uploadFileToFolder(this)">Subir Archivo</button>
+                <button class="add-link" onclick="addLinkToFolder(this)">Agregar Enlace</button>
             `;
             foldersContainer.appendChild(newFolder);
         }
@@ -132,6 +156,46 @@
             newTask.className = 'task';
             newTask.innerHTML = '<textarea></textarea>';
             folder.insertBefore(newTask, button);
+        }
+
+        function addLink(listId) {
+            const list = document.getElementById(listId);
+            const newLink = document.createElement('div');
+            newLink.className = 'task';
+            newLink.innerHTML = '<input type="text" placeholder="Agregar enlace" />';
+            list.insertBefore(newLink, list.querySelector('.add-link'));
+        }
+
+        function addLinkToFolder(button) {
+            const folder = button.parentElement;
+            const newLink = document.createElement('div');
+            newLink.className = 'task';
+            newLink.innerHTML = '<input type="text" placeholder="Agregar enlace" />';
+            folder.insertBefore(newLink, button);
+        }
+
+        function uploadFile(listId) {
+            const list = document.getElementById(listId);
+            const newUpload = document.createElement('div');
+            newUpload.className = 'task';
+            newUpload.innerHTML = '<input type="file">';
+            list.insertBefore(newUpload, list.querySelector('.upload-file'));
+        }
+
+        function uploadFileToFolder(button) {
+            const folder = button.parentElement;
+            const newUpload = document.createElement('div');
+            newUpload.className = 'task';
+            newUpload.innerHTML = '<input type="file">';
+            folder.insertBefore(newUpload, button);
+        }
+
+        function handleFileUpload() {
+            const files = document.getElementById('fileUpload').files;
+            for (let i = 0; i < files.length; i++) {
+                console.log('Archivo subido:', files[i].name);
+            }
+            alert('Archivos subidos correctamente');
         }
     </script>
 </body>
